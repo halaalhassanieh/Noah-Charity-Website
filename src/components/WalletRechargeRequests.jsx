@@ -21,7 +21,7 @@ const WalletRechargeRequests = () => {
 
       const response = await axios.get('https://hope-lfey.onrender.com/api/wallet-requests', {
         headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
+        
       });
 
       const pendingRequests = response.data.filter(
