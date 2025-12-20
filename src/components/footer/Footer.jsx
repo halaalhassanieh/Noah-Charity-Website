@@ -1,5 +1,5 @@
 import { contactInfoData ,aboutlinks ,homelinks, icons } from "../../constants/Constants";
-import img from '/assets/hope_logo.png'
+import img from '/assets/noah_logo.jpg'
 import { NavLink } from "react-router-dom";
 
 const Footer = () => {
@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="flex md:flex-nowrap flex-wrap justify-between items-center sm:pt-[100px] sm:pb-14 pt-[50px] pb-5 "  >
           <div className=" flex justify-start items-start">
             <ul>
-              <li className="sm:mb-9 mb-6 w-1/4"><img src={img} alt="" /></li>
+              <li className="sm:mb-9 mb-6 w-1/4"><img className="rounded-full" src={img} alt="" /></li>
               {contactInfoData.slice(0, limit).map((info, index) => (
                 <li className="flex justify-start items-center gap-2 font-normal text-grey/15 custom-2xl:text-lg lg:text-base text-[15px] leading-[22.5px] my-5"
                   key={index}>
@@ -61,7 +61,7 @@ const Footer = () => {
 
         <div className="flex justify-center items-center sm:py-[30px] py-6 border-t-1 border-white/95
         text-grey/40 font-normal custom-2xl:text-lg text-sm">
-          <p>© 2025 Hope Charity. All rights reserved.</p> </div>
+          <p>© 2025 Noah Charity. All rights reserved.</p> </div>
 
       </div>
     </footer>

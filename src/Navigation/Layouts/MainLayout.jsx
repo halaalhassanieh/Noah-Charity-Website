@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom"
 import NavBar from "../../components/NavBar"
-import logo from "/assets/hope_logo.png"
+import logo from "/assets/noah_logo.jpg"
 import { FaBars } from "react-icons/fa";
 import { useEffect } from "react";
 
@@ -48,8 +48,8 @@ const MainLayout = () => {
 
     <div className=" min-h-screen">
       <div className="relative">
-        <NavBar icon={<FaBars />} logo={logo} LoginButton={LoginButton} NavLinkData={NavLinkData} />
-        <Outlet />
+        <div className="fixed w-full  mb-10"><NavBar icon={<FaBars />} logo={logo} LoginButton={LoginButton} NavLinkData={NavLinkData} /></div>
+        <div className="w-full"><Outlet /></div>
       </div>
 
     </div>

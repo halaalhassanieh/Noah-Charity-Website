@@ -16,13 +16,16 @@ const NavBar = ({ icon, logo, NavLinkData, LoginButton }) => {
 
     return (
 
-        <div className='bg-black font-vietnam '>
+        <div className='  bg-gradient-to-b from-black to-transparent font-vietnam  '>
 
-            <div className='custom-container flex justify-between items-center  custom-3xl:py-6 py-5 '>
+            <div className='custom-container flex justify-between items-center  custom-3xl:py-5 py-4 '>
 
                 {/* div contains the logo pic */}
-                <div>
-                    <img className='custom-3xl:h-10 custom-2xl:h-9 h-8' src={logo} alt="logo" />
+                <div className='flex justify-center items-center gap-3'>
+                    <div>
+                    <img className='custom-3xl:h-16 custom-2xl:h-14 h-10 rounded-full shadow-sm shadow-black' src={logo} alt="logo" /> </div>
+                    <div className='text-white font-bold text-shadow-black
+                        custom-2xl:text-4xl custom-xl:text-4xl custom-tap:text-2xl text-2xl'>Noah</div>
                 </div>
 
                 {/* div contains the main ul and the toggle bars button  */}
@@ -51,7 +54,7 @@ const NavBar = ({ icon, logo, NavLinkData, LoginButton }) => {
                 </div>
 
                 {/* div contains the login button and profile circle*/}
-                <div className='flex items-center gap-4'>
+                <div className='flex justify-center items-center '>
 
                     {localStorage.getItem("token") ? (
 
@@ -60,7 +63,7 @@ const NavBar = ({ icon, logo, NavLinkData, LoginButton }) => {
                     ) : (
                         // Show login button only when not logged in
                         <button
-                            className='text-white bg-red-wine rounded-2xl py-1
+                            className='text-white bg-red-wine rounded-2xl py-1 shadow-sm shadow-black
                  custom-2xl:px-10 custom-xl:px-8 px-5
                  custom-xl:font-bold font-medium
                  custom-2xl:text-base text-sm'

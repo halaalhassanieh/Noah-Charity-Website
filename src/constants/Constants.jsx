@@ -105,7 +105,7 @@ export const NewsHead = {
     
    export const contactInfoData=[
     {
-    info: "support@hopecharity.com",
+    info: "support@noahcharity.com",
     icons: [<FaEnvelope />],
   },
   {
@@ -113,7 +113,7 @@ export const NewsHead = {
     icons: [<FaPhoneAlt />],
   },
   {
-    info: "Syria, Homs",
+    info: "Syria, Damascus",
     icons: [<FaLocationDot />],
   },
   {

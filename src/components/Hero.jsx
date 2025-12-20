@@ -11,7 +11,7 @@ const Hero = ({ title1, title2, subtilte, buttonName, buttonPath }) => {
   return (
 
     <div className='bg-hero bg-no-repeat bg-cover bg-center font-vietnam
-    custom-3xl:h-[95vh] custom-xl:h-[90vh] custom-tap:h-[85vh] h-[65vh]'>
+    custom-3xl:h-screen custom-xl:h-screen custom-tap:h-[85vh] h-[65vh]'>
 
       <div className='custom-container '>
 
