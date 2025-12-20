@@ -16,7 +16,7 @@ const NavBar = ({ icon, logo, NavLinkData, LoginButton }) => {
 
     return (
 
-        <div className='  bg-gradient-to-b from-black to-transparent font-vietnam  '>
+        <div className={MenuButton?"bg-black/65 font-vietnam":" bg-gradient-to-b from-black to-transparent font-vietnam  "}>
 
             <div className='custom-container flex justify-between items-center  custom-3xl:py-5 py-4 '>
 
@@ -77,10 +77,11 @@ const NavBar = ({ icon, logo, NavLinkData, LoginButton }) => {
 
             {/* div for the menu ul if menubutton is true it shows up  */}
 
-            <div className='custom-container custom-tap:hidden flex justify-center items-center'>
+            <div className='custom-container  custom-tap:hidden flex justify-center items-center'>
 
                 {MenuButton && (
                     <ul className="
+                    
                     flex flex-col 
                     justify-items-center 
                     items-center
