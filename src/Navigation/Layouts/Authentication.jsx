@@ -1,10 +1,24 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
+import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Authentication = () => {
-  return (
-    <Outlet/>
-  )
-}
+  const { isAuthenticated, loading } = useSelector(
+    (state) => state.auth
+  );
 
-export default Authentication
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-xl">
+        Loading...
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
+};
+
+export default Authentication;

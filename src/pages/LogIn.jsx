@@ -1,40 +1,29 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../redux/auth/authSlice";
 
 const LogIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const { loading, error, isAuthenticated } = useSelector(
+    (state) => state.auth
+  );
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const response = await axios.post("https://hope-lfey.onrender.com/api/auth/login", {
-        email,
-        password
-      });
-
-      // Store token and email in localStorage
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("id", response.data.id);
-      localStorage.setItem("email", email);
-      localStorage.setItem("isAdmin", response.data.isAdmin);
-      console.log("Login success:", response.data);
-      navigate("/dashboard");
-    } catch (err) {
-      const msg = err.response?.data?.message || "Login failed. Please try again.";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+    dispatch(login({ email, password }));
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="flex items-center justify-center bg-gray-100 font-vietnam px-6 py-10">
@@ -44,7 +33,9 @@ const LogIn = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-8 text-lg">
-          {error && <p className="text-red-500 text-center">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-center font-medium">{error}</p>
+          )}
 
           <div>
             <label className="block text-gray-600 mb-2 text-xl">Email</label>
@@ -53,7 +44,7 @@ const LogIn = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-6 py-4 border border-gray-300 rounded-xl bg-white/60 text-black focus:outline-none focus:ring-4 focus:ring-red-wine"
+              className="w-full px-6 py-4 border border-gray-300 rounded-xl"
             />
           </div>
 
@@ -64,21 +55,21 @@ const LogIn = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-6 py-4 border border-gray-300 rounded-xl bg-white/60 text-black focus:outline-none focus:ring-4 focus:ring-red-wine"
+              className="w-full px-6 py-4 border border-gray-300 rounded-xl"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className={`w-full ${loading ? "bg-red-300" : "bg-red-wine hover:bg-red-wine"} text-white py-4 text-xl rounded-xl transition duration-200 font-semibold`}
+            className="w-full bg-red-wine text-white py-4 text-xl rounded-xl"
           >
             {loading ? "Logging In..." : "Login"}
           </button>
 
           <p className="text-md text-center text-gray-600 mt-6">
             Don’t have an account?{" "}
-            <Link to="/signup" className="text-red-wine hover:underline font-medium">
+            <Link to="/signup" className="text-red-wine hover:underline">
               Sign up
             </Link>
           </p>
