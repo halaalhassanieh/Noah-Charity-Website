@@ -1,36 +1,37 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchCauses,
+  donateToCause,
+  deleteCause,
+} from "../redux/causes/causesSlice";
 
 const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
-  const [causes, setCauses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { causes, loading } = useSelector((state) => state.causes);
+
   const [search, setSearch] = useState("");
   const [selectedCause, setSelectedCause] = useState(null);
   const [donation, setDonation] = useState(null);
   const [customAmount, setCustomAmount] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
   const causesPerPage = cardsnumber;
-  const token = localStorage.getItem("token");
-  const navigate = useNavigate();
 
+  /* =========================
+     Fetch Causes
+  ========================= */
   useEffect(() => {
-    fetchCauses();
-  }, []);
+    dispatch(fetchCauses());
+  }, [dispatch]);
 
-  const fetchCauses = async () => {
-    try {
-      const response = await axios.get("https://hope-lfey.onrender.com/api/cause");
-      setCauses(response.data);
-    } catch (error) {
-      console.error("Error fetching causes:", error);
-      alert("Failed to load causes.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  /* =========================
+     Donate
+  ========================= */
   const handleDonate = async (causeId) => {
     const amount = Number(donation || customAmount);
     if (!amount || amount <= 0) {
@@ -38,41 +39,33 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
     }
 
     try {
-      await axios.post(
-        `https://hope-lfey.onrender.com/api/cause/donate/${causeId}`,
-        { amount },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setCauses((prev) =>
-        prev.map((c) =>
-          c._id === causeId ? { ...c, raised: c.raised + amount } : c
-        )
-      );
-
-      if (selectedCause?._id === causeId) {
-        setSelectedCause((prev) => ({ ...prev, raised: prev.raised + amount }));
-      }
-
-      alert(`Successfully donated $${amount}! `);
+      await dispatch(donateToCause({ causeId, amount })).unwrap();
+      alert(`Successfully donated $${amount}!`);
       setDonation(null);
       setCustomAmount("");
-    } catch (error) {
-      console.error("Donation error:", error);
+    } catch (err) {
       alert(
-        "Failed to process donation, please check your wallet amount or the internet connection"
+        err ||
+          "Failed to process donation, please check your wallet or connection."
       );
     }
   };
 
-  // Filtered causes
+  /* =========================
+     Delete (Admin)
+  ========================= */
+  const handleDelete = (id) => {
+    if (!window.confirm("Are you sure you want to delete this cause?")) return;
+    dispatch(deleteCause(id));
+  };
+
+  /* =========================
+     Filtering & Pagination
+  ========================= */
   const filteredCauses = causes.filter((cause) =>
     cause.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Pagination
   const totalPages = Math.ceil(filteredCauses.length / causesPerPage);
   const startIndex = (currentPage - 1) * causesPerPage;
   const paginatedCauses = filteredCauses.slice(
@@ -96,6 +89,7 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
           <h2 className="custom-xl:text-[50px] custom-tap:text-[45px] text-[40px] text-black font-bold pb-3 custom-tap:w-2/3 w-3/4">
             Latest Causes
           </h2>
+
           {displayButton && (
             <button
               onClick={() => navigate("/causes")}
@@ -106,7 +100,6 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
           )}
         </div>
 
-        {/* Search bar (controlled by prop) */}
         {displaySearch && (
           <input
             type="text"
@@ -146,6 +139,7 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
                 <p className="text-gray/600 mb-2 line-clamp-3">
                   {cause.description}
                 </p>
+
                 <div className="text-sm text-black/60 space-y-1 mb-2">
                   <p>
                     <strong>Goal:</strong> ${cause.goal}
@@ -159,17 +153,26 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
                   <div
                     className="bg-red-wine h-3 rounded-full transition-all"
                     style={{ width: `${progress}%` }}
-                  ></div>
+                  />
                 </div>
               </div>
 
-              <div className="mt-3 flex justify-center items-center">
+              <div className="mt-3 flex flex-col gap-2">
                 <button
                   onClick={() => setSelectedCause(cause)}
-                  className="w-full bg-black hover:bg-red-wine text-white px-4 py-2 rounded-lg text-sm font-semibold transition hover:bg-black/60"
+                  className="w-full bg-black hover:bg-red-wine text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
                 >
                   View Details
                 </button>
+
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDelete(cause._id)}
+                    className="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -180,7 +183,7 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
       {totalPages > 1 && (
         <div className="flex justify-center items-center mt-8 space-x-2">
           <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
             className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
           >
@@ -203,7 +206,7 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
 
           <button
             onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              setCurrentPage((p) => Math.min(p + 1, totalPages))
             }
             disabled={currentPage === totalPages}
             className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
@@ -236,32 +239,9 @@ const MainCauses = ({ cardsnumber, displayButton, displaySearch }) => {
               />
             )}
 
-            <p className="text-gray-700 mb-4">{selectedCause.description}</p>
-
-            <div className="text-sm text-gray-600 mb-2">
-              <p>
-                <strong>Goal:</strong> ${selectedCause.goal}
-              </p>
-              <p>
-                <strong>Raised:</strong> ${selectedCause.raised}
-              </p>
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-              <div
-                className="bg-red-wine h-3 rounded-full transition-all"
-                style={{
-                  width: `${
-                    selectedCause.goal > 0
-                      ? Math.min(
-                          (selectedCause.raised / selectedCause.goal) * 100,
-                          100
-                        )
-                      : 0
-                  }%`,
-                }}
-              ></div>
-            </div>
+            <p className="text-gray-700 mb-4">
+              {selectedCause.description}
+            </p>
 
             <div className="border-t border-gray-300 pt-4">
               <h3 className="text-lg font-semibold text-black mb-2">

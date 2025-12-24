@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createCause } from "../redux/causes/causesSlice";
 
 const CreateCauseForm = () => {
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.causes);
 
-  const token = localStorage.getItem('token');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [goal, setGoal] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [goal, setGoal] = useState("");
   const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -14,43 +16,36 @@ const CreateCauseForm = () => {
     e.preventDefault();
 
     if (!title || !description || !goal || !image) {
-      alert('Please fill in all fields.');
+      alert("Please fill in all fields.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('goal', goal);
-    formData.append('image', image);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("goal", goal);
+    formData.append("image", image);
 
     try {
-      const response = await axios.post('https://hope-lfey.onrender.com/api/cause', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await dispatch(createCause(formData)).unwrap();
 
-      alert('Cause created successfully!');
-      console.log(response.data);
+      alert("Cause created successfully!");
 
       // Reset form
-      setTitle('');
-      setDescription('');
-      setGoal('');
+      setTitle("");
+      setDescription("");
+      setGoal("");
       setImage(null);
       setPreviewUrl(null);
-    } catch (error) {
-      console.error(error);
-      alert('Error creating cause. Please try again.');
+    } catch (err) {
+      alert(err || "Error creating cause");
     }
   };
 
   return (
     <div className="w-full custom-tap:px-12 px-1 custom-tap:py-[65px] py-4 font-vietnam bg-gray/100">
       <h2 className="text-2xl text-red-wine font-bold mb-6 pb-4 border-b-4 border-black">
-         Create New Cause
+        Create New Cause
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -76,12 +71,14 @@ const CreateCauseForm = () => {
             className="w-full p-3 border border-gray/600 rounded-lg focus:outline-none focus:border-red-wine min-h-[120px]"
             placeholder="Write about your cause..."
             required
-          ></textarea>
+          />
         </div>
 
         {/* Goal */}
         <div>
-          <label className="block text-black font-semibold">Goal Amount ($)</label>
+          <label className="block text-black font-semibold">
+            Goal Amount ($)
+          </label>
           <input
             type="number"
             value={goal}
@@ -92,7 +89,7 @@ const CreateCauseForm = () => {
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Image */}
         <div>
           <label className="block text-black font-semibold">Image</label>
           <input
@@ -101,15 +98,12 @@ const CreateCauseForm = () => {
             onChange={(e) => {
               const file = e.target.files[0];
               setImage(file);
-              if (file) {
-                setPreviewUrl(URL.createObjectURL(file));
-              } else {
-                setPreviewUrl(null);
-              }
+              setPreviewUrl(file ? URL.createObjectURL(file) : null);
             }}
             className="w-full p-2 border border-gray/600 rounded-lg"
             required
           />
+
           {previewUrl && (
             <img
               src={previewUrl}
@@ -122,10 +116,15 @@ const CreateCauseForm = () => {
         {/* Submit */}
         <button
           type="submit"
-          className="bg-red-wine text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-red-wine transition duration-200"
+          disabled={loading}
+          className="bg-red-wine text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-red-wine transition duration-200 disabled:opacity-60"
         >
-          Create Cause
+          {loading ? "Creating..." : "Create Cause"}
         </button>
+
+        {error && (
+          <p className="text-red-600 font-medium mt-2 text-sm">{error}</p>
+        )}
       </form>
     </div>
   );

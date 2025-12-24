@@ -1,49 +1,42 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCauses,
+  donateToCause,
+  deleteCause,
+} from "../redux/causes/causesSlice";
 
 const AllCauses = () => {
-  const [causes, setCauses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { causes, loading } = useSelector((state) => state.causes);
+
   const [search, setSearch] = useState("");
   const [selectedCause, setSelectedCause] = useState(null);
   const [donation, setDonation] = useState(null);
   const [customAmount, setCustomAmount] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const causesPerPage = 3; // exactly 3 per page
 
-  const token = localStorage.getItem("token");
+  const causesPerPage = 3;
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
+  /* =========================
+     Fetch Causes
+  ========================= */
   useEffect(() => {
-    fetchCauses();
-  }, []);
+    dispatch(fetchCauses());
+  }, [dispatch]);
 
-  const fetchCauses = async () => {
-    try {
-      const response = await axios.get("https://hope-lfey.onrender.com/api/cause");
-      setCauses(response.data);
-    } catch (error) {
-      console.error("Error fetching causes:", error);
-      alert("Failed to load causes.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
+  /* =========================
+     Delete (Admin)
+  ========================= */
+  const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this cause?")) return;
-
-    try {
-      await axios.delete(`https://hope-lfey.onrender.com/api/cause/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCauses(causes.filter((cause) => cause._id !== id));
-      alert("Cause deleted successfully.");
-    } catch (error) {
-      console.error("Delete error:", error);
-      alert("Failed to delete cause.");
-    }
+    dispatch(deleteCause(id));
   };
 
+  /* =========================
+     Donate
+  ========================= */
   const handleDonate = async (causeId) => {
     const amount = Number(donation || customAmount);
     if (!amount || amount <= 0) {
@@ -51,38 +44,31 @@ const AllCauses = () => {
     }
 
     try {
-      await axios.post(`https://hope-lfey.onrender.com/api/cause/donate/${causeId}`, { amount }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setCauses((prev) =>
-        prev.map((c) =>
-          c._id === causeId ? { ...c, raised: c.raised + amount } : c
-        )
-      );
-
-      if (selectedCause?._id === causeId) {
-        setSelectedCause((prev) => ({ ...prev, raised: prev.raised + amount }));
-      }
-
-      alert(`Successfully donated $${amount}! `);
+      await dispatch(donateToCause({ causeId, amount })).unwrap();
+      alert(`Successfully donated $${amount}!`);
       setDonation(null);
       setCustomAmount("");
-    } catch (error) {
-      console.error("Donation error:", error);
-      alert("Failed to process donation, please check your wallet amount or the internet connection.");
+    } catch (err) {
+      alert(
+        err ||
+          "Failed to process donation, please check your wallet or connection."
+      );
     }
   };
 
-  // Filtered causes
+  /* =========================
+     Filter & Pagination
+  ========================= */
   const filteredCauses = causes.filter((cause) =>
     cause.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Pagination
   const totalPages = Math.ceil(filteredCauses.length / causesPerPage);
   const startIndex = (currentPage - 1) * causesPerPage;
-  const paginatedCauses = filteredCauses.slice(startIndex, startIndex + causesPerPage);
+  const paginatedCauses = filteredCauses.slice(
+    startIndex,
+    startIndex + causesPerPage
+  );
 
   if (loading) {
     return (
@@ -93,11 +79,11 @@ const AllCauses = () => {
   }
 
   return (
-    <div className="p-3 md:p-10 bg-gray/100 font-vietnam ">
+    <div className="p-3 md:p-10 bg-gray/100 font-vietnam">
       {/* Header */}
       <div className="mt-3 mb-1">
         <div className="flex justify-between items-center mb-2 pb-3 border-b-4 border-black">
-          <h2 className="text-2xl text-red-wine font-bold"> All Causes</h2>
+          <h2 className="text-2xl text-red-wine font-bold">All Causes</h2>
         </div>
 
         <input
@@ -113,7 +99,9 @@ const AllCauses = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginatedCauses.map((cause) => {
           const progress =
-            cause.goal > 0 ? Math.min((cause.raised / cause.goal) * 100, 100) : 0;
+            cause.goal > 0
+              ? Math.min((cause.raised / cause.goal) * 100, 100)
+              : 0;
 
           return (
             <div
@@ -129,34 +117,46 @@ const AllCauses = () => {
               )}
 
               <div>
-                <h3 className="text-xl font-bold text-black mb-1">{cause.title}</h3>
-                <p className="text-gray/600  line-clamp-3 max-h-6">{cause.description}</p>
+                <h3 className="text-xl font-bold text-black mb-1">
+                  {cause.title}
+                </h3>
+                <p className="text-gray/600 line-clamp-3 max-h-6">
+                  {cause.description}
+                </p>
+
                 <div className="text-sm text-black/60 space-y-1 mb-2">
-                  <p><strong>Goal:</strong> ${cause.goal}</p>
-                  <p><strong>Raised:</strong> ${cause.raised}</p>
+                  <p>
+                    <strong>Goal:</strong> ${cause.goal}
+                  </p>
+                  <p>
+                    <strong>Raised:</strong> ${cause.raised}
+                  </p>
                 </div>
 
                 <div className="w-full bg-gray-200 rounded-full h-3 mb-1">
                   <div
                     className="bg-red-wine h-3 rounded-full transition-all"
                     style={{ width: `${progress}%` }}
-                  ></div>
+                  />
                 </div>
               </div>
 
-              <div className="mt-3 flex justify-between">
+              <div className="mt-3 flex justify-between gap-2">
                 <button
                   onClick={() => setSelectedCause(cause)}
                   className="bg-black hover:bg-red-wine text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
                 >
                   View Details
                 </button>
-                <button
-                  onClick={() => handleDelete(cause._id)}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition"
-                >
-                  Delete
-                </button>
+
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDelete(cause._id)}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -167,7 +167,7 @@ const AllCauses = () => {
       {totalPages > 1 && (
         <div className="flex justify-center items-center mt-5 space-x-2">
           <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
             className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
           >
@@ -179,7 +179,9 @@ const AllCauses = () => {
               key={i}
               onClick={() => setCurrentPage(i + 1)}
               className={`px-3 py-1 rounded-full ${
-                currentPage === i + 1 ? "bg-red-wine text-white" : "bg-gray-200"
+                currentPage === i + 1
+                  ? "bg-red-wine text-white"
+                  : "bg-gray-200"
               } hover:bg-red-wine`}
             >
               {i + 1}
@@ -187,7 +189,9 @@ const AllCauses = () => {
           ))}
 
           <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((p) => Math.min(p + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
             className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
           >
@@ -207,7 +211,9 @@ const AllCauses = () => {
               X
             </button>
 
-            <h2 className="text-2xl font-bold text-black mb-3">{selectedCause.title}</h2>
+            <h2 className="text-2xl font-bold text-black mb-3">
+              {selectedCause.title}
+            </h2>
 
             {selectedCause.image && (
               <img
@@ -217,28 +223,14 @@ const AllCauses = () => {
               />
             )}
 
-            <p className="text-gray-700 mb-4 ">{selectedCause.description}</p>
-
-            <div className="text-sm text-gray-600 mb-2">
-              <p><strong>Goal:</strong> ${selectedCause.goal}</p>
-              <p><strong>Raised:</strong> ${selectedCause.raised}</p>
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-              <div
-                className="bg-red-wine h-3 rounded-full transition-all"
-                style={{
-                  width: `${
-                    selectedCause.goal > 0
-                      ? Math.min((selectedCause.raised / selectedCause.goal) * 100, 100)
-                      : 0
-                  }%`,
-                }}
-              ></div>
-            </div>
+            <p className="text-gray-700 mb-4">
+              {selectedCause.description}
+            </p>
 
             <div className="border-t border-gray-300 pt-4">
-              <h3 className="text-lg font-semibold text-black mb-2">Choose the donation amount</h3>
+              <h3 className="text-lg font-semibold text-black mb-2">
+                Choose the donation amount
+              </h3>
 
               <div className="flex space-x-3 mb-3">
                 {[100, 200, 300, 400, 500].map((amount) => (
