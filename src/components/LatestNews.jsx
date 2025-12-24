@@ -1,39 +1,36 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { fetchBlogs } from "../redux/blogs/blogsSlice";
 
-const LatestNews = ({ blogsnumber = 3, displayButton = true, displaySearch = true }) => {
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+const LatestNews = ({
+  blogsnumber = 3,
+  displayButton = true,
+  displaySearch = true,
+}) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { blogs, loading } = useSelector((state) => state.blogs);
+
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
 
   const blogsPerPage = blogsnumber;
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchBlogs();
-  }, []);
-
-  const fetchBlogs = async () => {
-    try {
-      const response = await axios.get("https://hope-lfey.onrender.com/api/blog");
-      setBlogs(response.data);
-    } catch (error) {
-      console.error("Error fetching blogs:", error);
-      alert("Failed to load blogs.");
-    } finally {
-      setLoading(false);
+    if (!blogs.length) {
+      dispatch(fetchBlogs());
     }
-  };
+  }, [dispatch, blogs.length]);
 
-  //  Filter blogs based on search
+  // Filter
   const filteredBlogs = blogs.filter((blog) =>
     blog.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Pagination based on filtered blogs
+  // Pagination
   const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
   const paginatedBlogs = filteredBlogs.slice(
     (currentPage - 1) * blogsPerPage,
@@ -56,6 +53,7 @@ const LatestNews = ({ blogsnumber = 3, displayButton = true, displaySearch = tru
           <h2 className="custom-xl:text-[50px] custom-tap:text-[45px] text-[40px] text-black font-bold pb-3 custom-tap:w-2/3 w-3/4">
             Latest News and Blog
           </h2>
+
           {displayButton && (
             <button
               onClick={() => navigate("/news")}
@@ -66,18 +64,21 @@ const LatestNews = ({ blogsnumber = 3, displayButton = true, displaySearch = tru
           )}
         </div>
 
-        {/*  Search */}
+        {/* Search */}
         {displaySearch && (
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Search blogs by title..."
             className="w-full mb-6 p-2 text-sm border border-gray-600 rounded-lg focus:outline-none focus:border-red-wine"
           />
         )}
 
-        {/* Blog Grid */}
+        {/* Blogs Grid */}
         <div className="grid grid-cols-1 custom-tap:grid-cols-2 custom-xl:grid-cols-3 gap-6">
           {paginatedBlogs.map((blog) => (
             <div
@@ -91,6 +92,7 @@ const LatestNews = ({ blogsnumber = 3, displayButton = true, displaySearch = tru
                   className="w-full max-h-60 object-cover rounded-lg mb-4"
                 />
               )}
+
               <div>
                 <div className="text-sm text-black/60 space-y-1">
                   <p>
@@ -98,18 +100,20 @@ const LatestNews = ({ blogsnumber = 3, displayButton = true, displaySearch = tru
                     {new Date(blog.createdAt).toLocaleString()}
                   </p>
                 </div>
+
                 <h3 className="text-xl font-bold text-black mb-1">
                   {blog.title}
                 </h3>
+
                 <p className="text-gray/600 mb-2 max-h-5 line-clamp-3">
                   {blog.description}
                 </p>
               </div>
 
-              <div className="mt-4 flex justify-center ">
+              <div className="mt-4 flex justify-center">
                 <button
                   onClick={() => setSelectedBlog(blog)}
-                  className="w-full bg-red-wine hover:bg-red-wine text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                  className="w-full bg-red-wine text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
                 >
                   Read More
                 </button>
@@ -166,10 +170,15 @@ const LatestNews = ({ blogsnumber = 3, displayButton = true, displaySearch = tru
             >
               ×
             </button>
-            <h2 className="text-2xl font-bold mb-2">{selectedBlog.title}</h2>
+
+            <h2 className="text-2xl font-bold mb-2">
+              {selectedBlog.title}
+            </h2>
+
             <p className="text-sm text-black/60 mb-4">
               {new Date(selectedBlog.createdAt).toLocaleString()}
             </p>
+
             {selectedBlog.image && (
               <img
                 src={selectedBlog.image}
@@ -177,6 +186,7 @@ const LatestNews = ({ blogsnumber = 3, displayButton = true, displaySearch = tru
                 className="w-full mb-4 rounded"
               />
             )}
+
             <p className="text-black whitespace-pre-wrap">
               {selectedBlog.description}
             </p>

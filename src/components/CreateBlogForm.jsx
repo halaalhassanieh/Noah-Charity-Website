@@ -1,58 +1,54 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { createBlog } from "../redux/blogs/blogsSlice";
 
 const CreateBlogForm = () => {
-  const token = localStorage.getItem('token');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const dispatch = useDispatch();
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null); //  New state for image preview
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!title || !description || !image) {
-      alert('Please fill in all fields.');
+      alert("Please fill in all fields.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('image', image);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("image", image);
 
     try {
-      const response = await axios.post('https://hope-lfey.onrender.com/api/blog', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await dispatch(createBlog(formData)).unwrap();
 
-      alert('Blog created successfully!');
-      console.log(response.data);
+      alert("Blog created successfully!");
 
       // Reset form
-      setTitle('');
-      setDescription('');
+      setTitle("");
+      setDescription("");
       setImage(null);
-      setPreviewUrl(null); // Clear preview
+      setPreviewUrl(null);
     } catch (error) {
       console.error(error);
-      alert('Error creating blog. Please try again.');
+      alert("Error creating blog. Please try again.");
     }
   };
 
   return (
     <div className="w-full custom-tap:px-12 px-1 custom-tap:py-[65px] py-4 font-vietnam bg-gray/100">
       <h2 className="text-2xl text-red-wine font-bold mb-6 pb-4 border-b-4 border-black">
-         Create New Blog
+        Create New Blog
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-1">
         {/* Title */}
         <div>
-          <label className="block text-black font-semibold ">Title</label>
+          <label className="block text-black font-semibold">Title</label>
           <input
             type="text"
             value={title}
@@ -65,34 +61,31 @@ const CreateBlogForm = () => {
 
         {/* Description */}
         <div>
-          <label className="block text-black font-semibold ">Description</label>
+          <label className="block text-black font-semibold">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full p-3 border border-gray/600 rounded-lg focus:outline-none focus:border-red-wine min-h-[120px]"
             placeholder="Write your blog content here..."
             required
-          ></textarea>
+          />
         </div>
-          
-        {/* Image Upload    */}
+
+        {/* Image Upload */}
         <div>
-          <label className="block text-black font-semibold ">Image</label>
+          <label className="block text-black font-semibold">Image</label>
           <input
             type="file"
             accept="image/*"
             onChange={(e) => {
               const file = e.target.files[0];
               setImage(file);
-              if (file) {
-                setPreviewUrl(URL.createObjectURL(file)); 
-              } else {
-                setPreviewUrl(null);
-              }
+              setPreviewUrl(file ? URL.createObjectURL(file) : null);
             }}
             className="w-full p-2 border border-gray/600 rounded-lg"
             required
           />
+
           {previewUrl && (
             <img
               src={previewUrl}
