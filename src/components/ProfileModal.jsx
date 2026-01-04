@@ -1,77 +1,61 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 import { logout } from "../redux/auth/authSlice";
+import {
+  fetchUser,
+  rechargeWallet,
+  clearUser,
+} from "../redux/user/userSlice";
 
 const ProfileModal = ({ onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { token, id } = useSelector((state) => state.auth);
+  const { email, wallet } = useSelector((state) => state.user);
 
-  const [email, setEmail] = useState("");
-  const [wallet, setWallet] = useState("");
   const [amount, setAmount] = useState("");
 
   /* =======================
-     Get user info
+     Fetch user
   ======================= */
   useEffect(() => {
-    if (!token || !id) return;
-
-    axios
-      .get(`https://hope-lfey.onrender.com/api/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setEmail(res.data.email);
-        setWallet(res.data.wallet);
-      })
-      .catch((error) => {
-        console.error(error);
-        alert("Cannot get user information");
-      });
-  }, [id, token]);
+    if (token && id) {
+      dispatch(fetchUser({ id, token }));
+    }
+  }, [dispatch, id, token]);
 
   /* =======================
      Logout
   ======================= */
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearUser());
     onClose();
     navigate("/login");
   };
 
   /* =======================
-     Wallet recharge
+     Recharge
   ======================= */
-  const handleRecharge = async () => {
+  const handleRecharge = () => {
     if (!amount || isNaN(amount) || Number(amount) <= 0) {
       alert("Please enter a valid amount.");
       return;
     }
 
-    try {
-      const res = await axios.post(
-        "https://hope-lfey.onrender.com/api/wallet-requests",
-        { amount },
-        {
-          headers: { Authorization: `Bearer ${token}` },
+    dispatch(rechargeWallet({ amount, token }))
+      .unwrap()
+      .then((res) => {
+        if (res.status === "approved") {
+          alert("Wallet recharge approved!");
+        } else {
+          alert("Recharge request sent but not yet approved.");
         }
-      );
-
-      if (res.data.status === "approved") {
-        alert("Wallet recharge approved!");
-      } else {
-        alert("Recharge request sent but not yet approved.");
-      }
-
-      setAmount("");
-    } catch (err) {
-      console.error("Recharge failed:", err);
-      alert("Recharge failed");
-    }
+        setAmount("");
+      })
+      .catch(() => alert("Recharge failed"));
   };
 
   return (
@@ -95,12 +79,11 @@ const ProfileModal = ({ onClose }) => {
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter amount"
             className="w-full px-3 py-2 border rounded-md mb-2"
           />
           <button
             onClick={handleRecharge}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
           >
             Request Funds
           </button>
@@ -108,7 +91,7 @@ const ProfileModal = ({ onClose }) => {
 
         <button
           onClick={handleLogout}
-          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition"
+          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl"
         >
           Logout
         </button>
