@@ -32,7 +32,7 @@ const FeedbackForm = () => {
   return (
     <div className="custom-container font-vietnam">
       <div className="flex md:flex-nowrap flex-wrap bg-gray/100 rounded-3xl">
-        <div className="bg-black p-10 text-white rounded-3xl">
+        <div className="bg-black custom-tap:w-auto w-full p-10 text-white rounded-3xl">
           <ul>
             <li className="mb-6 text-4xl font-bold">
               Share love,<br />donate hope.

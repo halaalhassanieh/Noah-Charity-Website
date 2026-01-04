@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="flex md:flex-nowrap flex-wrap justify-between items-center sm:pt-[100px] sm:pb-14 pt-[50px] pb-5 "  >
           <div className=" flex justify-start items-start">
             <ul>
-              <li className="sm:mb-9 mb-6 w-1/4"><img className="rounded-full" src={img} alt="" /></li>
+              <li className="sm:mb-9 mb-6 w-1/5 "><img className="rounded-full" src={img} alt="" /></li>
               {contactInfoData.slice(0, limit).map((info, index) => (
                 <li className="flex justify-start items-center gap-2 font-normal text-grey/15 custom-2xl:text-lg lg:text-base text-[15px] leading-[22.5px] my-5"
                   key={index}>

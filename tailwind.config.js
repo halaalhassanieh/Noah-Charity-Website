@@ -37,7 +37,7 @@ export default {
         vietnam: ['"Be Vietnam Pro"', "sans-serif"],
       },
       boxShadow: {
-        custom: "0px 0px 0px 4px #FFF4E5",
+        custom: "0px 1px 0px 1px #7B000B",
       },
     },
   },

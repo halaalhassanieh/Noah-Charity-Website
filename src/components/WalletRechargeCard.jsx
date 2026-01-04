@@ -41,18 +41,18 @@ const WalletRechargeCard = ({ request }) => {
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-md font-vietnam">
-      <div className="flex justify-between mb-4">
-        <div>
+      <div className="flex flex-wrap justify-between mb-4">
+        <div className="">
           <h3 className="text-lg font-bold">{userName}</h3>
-          <p className="text-sm text-gray-600">User ID: {userId}</p>
-          <p className="text-sm text-gray-600">
+          <p className="custom-xl:text-sm custom-tap:text-xs text-sm text-gray-600 flex">User ID: {userId}</p>
+          <p className="custom-xl:text-sm custom-tap:text-xs text-sm text-gray-600">
             {new Date(createdAt).toLocaleDateString()}
           </p>
         </div>
         <div className="text-red-wine font-bold text-xl">+${amount}</div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <button
           onClick={() => handleAction("approve")}
           disabled={actionLoading}

@@ -27,13 +27,13 @@ const SignUp = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 font-vietnam py-4 px-4">
-      <div className="custom-container w-full max-w-2xl bg-white p-9 rounded-2xl shadow-custom border border-gray-300">
-        <h2 className="text-4xl font-bold text-center text-red-wine mb-8">
+    <div className="flex items-center justify-center bg-gray-100 font-vietnam h-screen px-4">
+      <div className="custom-container w-full max-w-2xl bg-white p-6 rounded-2xl shadow-custom border border-gray-300">
+        <h2 className="text-3xl font-bold text-center text-red-wine mb-8">
           Create Your Account
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-8 text-lg">
+        <form onSubmit={handleSubmit} className="space-y-6 text-lg">
           {error && (
             <p className="text-red-500 text-center font-medium">{error}</p>
           )}
@@ -45,7 +45,7 @@ const SignUp = () => {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               required
-              className="w-full px-6 py-4 border border-gray-300 rounded-xl"
+              className="w-full px-5 py-3 border border-gray-300 rounded-xl"
             />
           </div>
 
@@ -56,7 +56,7 @@ const SignUp = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-5 py-4 border border-gray-300 rounded-xl"
+              className="w-full px-5 py-3 border border-gray-300 rounded-xl"
             />
           </div>
 
@@ -67,7 +67,7 @@ const SignUp = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-5 py-4 border border-gray-300 rounded-xl"
+              className="w-full px-5 py-3 border border-gray-300 rounded-xl"
             />
           </div>
 

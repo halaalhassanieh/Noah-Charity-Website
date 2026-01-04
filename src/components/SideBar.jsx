@@ -28,7 +28,7 @@ const SideBar = () => {
   return (
     <div className="flex  flex-col custom-tap:flex-row h-full">
       {/* Sidebar - Column on large, Row on small */}
-      <div className="bg-gray/100 text-black/60 font-vietnam custom-tap:w-1/4 w-full py-1 px-4">
+      <div className="bg-gray/100 text-black/60 font-vietnam custom-tap:w-1/4 w-full py-8 px-4">
         <div className="text-red-wine text-2xl font-bold my-2 custom-tap:my-8 pl-2 pr-4 py-2 custom-tap:py-4 border-b-4 custom-tap:border-b-4 border-black text-center custom-tap:text-left">
           Admin Control
         </div>
@@ -93,7 +93,7 @@ const SideBar = () => {
       </div>
 
       {/* Main Content */}
-      <div className="custom-tap:px-10 px-2 w-full">{renderContent()}</div>
+      <div className="custom-tap:px-10 px-2 pt-7 pb-1 w-full">{renderContent()}</div>
     </div>
   );
 };
